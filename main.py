@@ -84,13 +84,13 @@ class BaseWidget(QWidget):
         self.vtk_overlay_window.add_vtk_models(model_loader.models)
 
     def setup_upload_button(self):
-        self.upload_button = QPushButton("上传模型")
+        self.upload_button = QPushButton("Upload model")
         self.layout.addWidget(self.upload_button)
         self.upload_button.clicked.connect(self.open_file_dialog)
 
     def open_file_dialog(self):
-        model_dir = QFileDialog.getExistingDirectory(self, "选择模型目录")
-        if model_dir:  # 确保用户选择了一个目录
+        model_dir = QFileDialog.getExistingDirectory(self, "Select index of model")
+        if model_dir:
             self.add_vtk_models_from_dir(model_dir)
 
 
@@ -278,9 +278,9 @@ class OverlayOnVideoFeed(OverlayBaseWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    model_dir = './models'
+    #model_dir = './models'
     overlay_widget = OverlayBaseWidget(0)
-    overlay_widget.add_vtk_models_from_dir(model_dir)
+    #overlay_widget.add_vtk_models_from_dir(model_dir)
     overlay_widget.show()
     overlay_widget.start()
     sys.exit(app.exec())
