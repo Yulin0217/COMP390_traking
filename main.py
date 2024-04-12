@@ -1,6 +1,6 @@
 import platform
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QApplication, QFileDialog, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QApplication, QFileDialog, QPushButton, QComboBox
 from sksurgeryimage.acquire.video_source import TimestampedVideoSource
 from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
@@ -39,6 +39,7 @@ class BaseWidget(QWidget):
         self.img = None
         self.save_frame = None
         self.setup_upload_button()
+        self.setup_video_source_controls()
 
     def start(self):
         """
@@ -74,7 +75,6 @@ class BaseWidget(QWidget):
 
         raise NotImplementedError('Should have implemented this method.')
 
-
     def add_vtk_models_from_dir(self, directory):
         """
         Add VTK models to the foreground.
@@ -93,27 +93,41 @@ class BaseWidget(QWidget):
         if model_dir:
             self.add_vtk_models_from_dir(model_dir)
 
+    def setup_video_source_controls(self):
+
+        self.video_source_selector = QComboBox()
+        self.video_source_selector.addItems(["Camera 1", "Camera 2", "Upload Video File"])
+        self.layout.addWidget(self.video_source_selector)
+
+        self.upload_video_button = QPushButton("Upload Video File")
+        self.upload_video_button.clicked.connect(self.upload_video)
+        self.upload_video_button.setVisible(False)
+        self.layout.addWidget(self.upload_video_button)
+
+        self.video_source_selector.currentIndexChanged.connect(self.handle_video_source_change)
+
+    def handle_video_source_change(self, index):
+        if self.video_source_selector.currentText() == "Upload Video File":
+            self.upload_video_button.setVisible(True)
+        else:
+            self.upload_video_button.setVisible(False)
+
+    def upload_video(self):
+        video_file_path, _ = QFileDialog.getOpenFileName(self, "Select Video File", "", "Video Files (*.mp4 *.avi)")
+        if video_file_path:
+            self.change_video_source(video_file_path)
+
 
 class OverlayBaseWidget(BaseWidget):
 
     def __init__(self, image_source):
-        """override the default constructor to set up sksurgeryarucotracker"""
-
-        # we'll use SciKit-SurgeryArUcoTracker to estimate the pose of the
-        # visible ArUco tag relative to the camera. We use a dictionary to
-        # configure SciKit-SurgeryArUcoTracker
 
         ar_config = {
             "tracker type": "aruco",
-            # Set to none, to share video source with OverlayBaseWidget
             "video source": 'none',
             "debug": False,
-            # the aruco tag dictionary to use. DICT_4X4_50 will work with
-            # ../tags/aruco_4by4_0.pdf
             "aruco dictionary": 'DICT_4X4_50',
-            "marker size": 50,  # in mm
-            # We need a calibrated camera. For now let's just use a
-            # a hard coded estimate. Maybe you could improve on this.
+            "marker size": 50,
             "camera projection": numpy.array([[560.0, 0.0, 320.0],
                                               [0.0, 560.0, 240.0],
                                               [0.0, 0.0, 1.0]],
@@ -123,11 +137,9 @@ class OverlayBaseWidget(BaseWidget):
         self.tracker = ArUcoTracker(ar_config)
         self.tracker.start_tracking()
 
-        # and call the constructor for the base class
         if sys.version_info > (3, 0):
             super().__init__(image_source)
         else:
-            # super doesn't work the same in py2.7
             OverlayBaseWidget.__init__(self, image_source)
 
     def update_view(self):
@@ -138,12 +150,9 @@ class OverlayBaseWidget(BaseWidget):
 
         _, image = self.video_source.read()
 
-
         self._aruco_detect_and_follow(image)
 
-
         self.vtk_overlay_window.set_video_image(image)
-
 
         self.vtk_overlay_window.set_camera_state({"ClippingRange": [10, 800]})
 
@@ -156,30 +165,18 @@ class OverlayBaseWidget(BaseWidget):
         """Detect any aruco tags present using sksurgeryarucotracker
         """
 
-        # tracker.get_frame(image) returns 5 lists of tracking data.
-        # we'll only use the tracking matrices (tag2camera)
         _port_handles, _timestamps, _frame_numbers, tag2camera, \
             _tracking_quality = self.tracker.get_frame(image)
 
-        # If no tags are detected tag2camera will be an empty list, which
-        # Python interprets as False
         if tag2camera:
-            # pass the first entry in tag2camera. If you have more than one tag
-            # visible, you may need to do something cleverer here.
             self._move_camera(tag2camera[0])
 
     def _move_camera(self, tag2camera):
-        """Internal method to move the rendered models in
-        some interesting way"""
 
-        # SciKit-SurgeryCore has a useful TransformManager that makes
-        # chaining together and inverting transforms more intuitive.
-        # We'll just use it to invert a matrix here.
         transform_manager = TransformManager()
         transform_manager.add("tag2camera", tag2camera)
         camera2tag = transform_manager.get("camera2tag")
 
-        # Let's move the camera, rather than the model this time.
         self.vtk_overlay_window.set_camera_pose(camera2tag)
 
 
@@ -198,8 +195,8 @@ class OverlayOnVideoFeed(OverlayBaseWidget):
         self.vtk_overlay_window.Render()
 
         if platform.system() == 'Linux':
-            self.vtk_overlay_window.Initialize()  # Allows the interactor to initialize itself. # pylint: disable=line-too-long
-            self.vtk_overlay_window.Start()  # Start the event loop. # pylint: disable=line-too-long
+            self.vtk_overlay_window.Initialize()
+            self.vtk_overlay_window.Start()
 
 
 # class OverlayOnVideoFeedCropRecord(OverlayBaseWidget):
@@ -278,9 +275,9 @@ class OverlayOnVideoFeed(OverlayBaseWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    #model_dir = './models'
+    # model_dir = './models'
     overlay_widget = OverlayBaseWidget(0)
-    #overlay_widget.add_vtk_models_from_dir(model_dir)
+    # overlay_widget.add_vtk_models_from_dir(model_dir)
     overlay_widget.show()
     overlay_widget.start()
     sys.exit(app.exec())
