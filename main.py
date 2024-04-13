@@ -7,7 +7,7 @@ import sys
 import numpy
 from sksurgerycore.transforms.transform_manager import TransformManager
 from sksurgeryarucotracker.arucotracker import ArUcoTracker
-from sksurgeryvtk.models.vtk_surface_model_directory_loader import VTKSurfaceModelDirectoryLoader
+from model_loader import ModelDirectoryLoader
 
 class BaseWidget(QWidget):
     def __init__(self, video_source, dims=None):
@@ -48,7 +48,7 @@ class BaseWidget(QWidget):
 
     def add_vtk_models_from_dir(self, directory):
         # Load and add VTK models from a directory
-        model_loader = VTKSurfaceModelDirectoryLoader(directory)
+        model_loader = ModelDirectoryLoader(directory)
         self.vtk_overlay_window.add_vtk_models(model_loader.models)
 
     def update_view(self):
