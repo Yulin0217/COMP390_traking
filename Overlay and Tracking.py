@@ -1,6 +1,7 @@
 import platform
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog,QMessageBox
+from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog, \
+    QVBoxLayout, QMessageBox
 from modified_video_source import TimestampedVideoSource
 from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
@@ -8,6 +9,7 @@ import numpy
 from sksurgerycore.transforms.transform_manager import TransformManager
 from sksurgeryarucotracker.arucotracker import ArUcoTracker
 from model_loader import ModelDirectoryLoader
+import numpy as np
 
 
 class BaseWidget(QWidget):
@@ -15,7 +17,7 @@ class BaseWidget(QWidget):
         super().__init__()
         # Setup the layout for the widget
         self.color_button = None
-        self.layout = QHBoxLayout(self)
+        self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
@@ -120,9 +122,6 @@ class BaseWidget(QWidget):
             model_loader = ModelDirectoryLoader(self.model_dir, rgb_color)
             self.vtk_overlay_window.add_vtk_models(model_loader.models)
             self.vtk_overlay_window.Render()  # Re-render the window to update the color
-
-
-import numpy
 
 
 class OverlayBaseWidget(BaseWidget):
