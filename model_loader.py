@@ -9,9 +9,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ModelDirectoryLoader:
-
-    def __init__(self, directory_name, defaults_file=None):
-
+    # Initializes with directory name, optional RGB color, and configuration file.
+    def __init__(self, directory_name, rgb_color=None, defaults_file=None):
+        # Check for valid input directory and permissions.
         if directory_name is None:
             raise ValueError('Directory name is None')
         if not directory_name:
@@ -23,20 +23,23 @@ class ModelDirectoryLoader:
         if not os.access(directory_name, os.R_OK):
             raise ValueError(f'Directory is not readable: {directory_name}')
 
+        # Load configuration data if defaults file is provided.
         self.configuration_data = None
-
         self.defaults_file = defaults_file
         if self.defaults_file:
             configuration_manager = cm.ConfigurationManager(self.defaults_file)
             self.configuration_data = configuration_manager.get_copy()
 
+        # Initialize or fetch model colors.
         self.colours = None
         if directory_name:
-            self.get_model_colours(directory_name)
+            self.get_model_colours(directory_name, rgb_color)
 
+        # Load models from the specified directory.
         self.models = []
         self.get_models(directory_name)
 
+    # Loads and initializes models from the directory.
     def get_models(self, directory_name):
         LOGGER.info("Loading models from %s", directory_name)
 
@@ -55,7 +58,6 @@ class ModelDirectoryLoader:
                 model = sm.VTKSurfaceModel(full_path, (1.0, 1.0, 1.0))
                 model_name = os.path.splitext(model.get_name())[0]
                 model.set_name(model_name)
-
 
                 if self.configuration_data:
                     if model_name in self.configuration_data.keys():
@@ -119,7 +121,8 @@ class ModelDirectoryLoader:
 
         LOGGER.info("Loaded models from %s", directory_name)
 
-    def get_model_colours(self, directory):
+    # Loads or sets model colors from a file or uses the provided RGB color.
+    def get_model_colours(self, directory, rgb_color):
 
         self.colours = {}
 
@@ -145,11 +148,15 @@ class ModelDirectoryLoader:
                     full_path = os.path.join(directory, filename)
                     if not os.path.exists(full_path):
                         raise FileNotFoundError(
-                                f"File {full_path} doesn't exist")
+                            f"File {full_path} doesn't exist")
 
-                    self.colours[filename] = (float(row[1]),
-                                              float(row[2]),
-                                              float(row[3]))
+                    if not rgb_color:
+                        self.colours[filename] = (float(row[1]),
+                                                  float(row[2]),
+                                                  float(row[3]))
+                    else:
+                        self.colours[filename] = (float(rgb_color[0]), float(rgb_color[1]), float(rgb_color[2]))
+
         else:
             for i in range(len(default_colours)):
                 self.colours[str(i)] = default_colours[i]

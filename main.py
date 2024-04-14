@@ -1,6 +1,6 @@
 import platform
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog,QMessageBox
 from modified_video_source import TimestampedVideoSource
 from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
@@ -9,10 +9,12 @@ from sksurgerycore.transforms.transform_manager import TransformManager
 from sksurgeryarucotracker.arucotracker import ArUcoTracker
 from model_loader import ModelDirectoryLoader
 
+
 class BaseWidget(QWidget):
     def __init__(self, video_source, dims=None):
         super().__init__()
         # Setup the layout for the widget
+        self.color_button = None
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
@@ -29,10 +31,11 @@ class BaseWidget(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_view)
         self.update_rate = 30
-
+        self.model_dir = None
         # Setup additional controls
         self.setup_upload_button()
         self.setup_video_source_controls()
+        self.setup_color_change_button()
 
     def start(self):
         # Start the timer with a frequency based on update_rate
@@ -63,9 +66,9 @@ class BaseWidget(QWidget):
 
     def open_file_dialog(self):
         # Open a file dialog to select the directory of models
-        model_dir = QFileDialog.getExistingDirectory(self, "Select model directory")
-        if model_dir:
-            self.add_vtk_models_from_dir(model_dir)
+        self.model_dir = QFileDialog.getExistingDirectory(self, "Select model directory")
+        if self.model_dir:
+            self.add_vtk_models_from_dir(self.model_dir)
 
     def setup_video_source_controls(self):
         # Setup video source controls
@@ -98,6 +101,27 @@ class BaseWidget(QWidget):
         self.video_source.update_source(new_source)
         self.start()
 
+    def setup_color_change_button(self):
+        # Adds a button to change model colors
+        self.color_button = QPushButton("Change Model Color")
+        self.layout.addWidget(self.color_button)
+        self.color_button.clicked.connect(self.change_model_color)
+
+    def change_model_color(self):
+        # Check if models have been loaded
+        if not hasattr(self, 'model_dir') or not self.model_dir:
+            QMessageBox.warning(self, "No Models Loaded", "Please upload models first.")
+            return
+
+        # Opens a color picker dialog and applies the selected color to models
+        color = QColorDialog.getColor()
+        if color.isValid():
+            rgb_color = (color.red() / 255.0, color.green() / 255.0, color.blue() / 255.0)
+            model_loader = ModelDirectoryLoader(self.model_dir, rgb_color)
+            self.vtk_overlay_window.add_vtk_models(model_loader.models)
+            self.vtk_overlay_window.Render()  # Re-render the window to update the color
+
+
 class OverlayBaseWidget(BaseWidget):
     def __init__(self, image_source):
         super().__init__(image_source)
@@ -108,7 +132,8 @@ class OverlayBaseWidget(BaseWidget):
             "debug": False,
             "aruco dictionary": 'DICT_4X4_50',
             "marker size": 50,
-            "camera projection": numpy.array([[560.0, 0.0, 320.0], [0.0, 560.0, 240.0], [0.0, 0.0, 1.0]], dtype=numpy.float32),
+            "camera projection": numpy.array([[560.0, 0.0, 320.0], [0.0, 560.0, 240.0], [0.0, 0.0, 1.0]],
+                                             dtype=numpy.float32),
             "camera distortion": numpy.zeros((1, 4), numpy.float32)
         }
         self.tracker = ArUcoTracker(ar_config)
@@ -137,6 +162,7 @@ class OverlayBaseWidget(BaseWidget):
         transform_manager.add("tag2camera", tag2camera)
         camera2tag = transform_manager.get("camera2tag")
         self.vtk_overlay_window.set_camera_pose(camera2tag)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
