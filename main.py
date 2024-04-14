@@ -122,46 +122,56 @@ class BaseWidget(QWidget):
             self.vtk_overlay_window.Render()  # Re-render the window to update the color
 
 
+import numpy
+
+
 class OverlayBaseWidget(BaseWidget):
     def __init__(self, image_source):
+        # Initialize the base class with the provided image source.
         super().__init__(image_source)
-        # Configuration for ArUco tracker
+
+        # Configure the ArUco tracker with specific parameters for tracking.
         ar_config = {
-            "tracker type": "aruco",
-            "video source": 'none',
-            "debug": False,
-            "aruco dictionary": 'DICT_4X4_50',
-            "marker size": 50,
-            "camera projection": numpy.array([[560.0, 0.0, 320.0], [0.0, 560.0, 240.0], [0.0, 0.0, 1.0]],
-                                             dtype=numpy.float32),
-            "camera distortion": numpy.zeros((1, 4), numpy.float32)
+            "tracker type": "aruco",  # Specifies the type of tracker to use.
+            "video source": 'none',  # Indicates that no separate video source will be used.
+            "debug": False,  # Debug mode is turned off.
+            "aruco dictionary": 'DICT_4X4_50',  # Specifies the dictionary of ArUco tags.
+            "marker size": 50,  # The size of the ArUco marker in mm.
+            "camera projection": numpy.array([[560.0, 0.0, 320.0],
+                                              [0.0, 560.0, 240.0],
+                                              [0.0, 0.0, 1.0]],
+                                             dtype=numpy.float32),  # Camera projection matrix.
+            "camera distortion": numpy.zeros((1, 4), numpy.float32)  # Camera distortion coefficients.
         }
         self.tracker = ArUcoTracker(ar_config)
-        self.tracker.start_tracking()
+        self.tracker.start_tracking()  # Start the ArUco tracker.
 
     def update_view(self):
-        # Update the view by reading from the video source, detecting ArUco markers, and rendering
-        _, image, _ = self.video_source.read()
-        self._aruco_detect_and_follow(image)
-        self.vtk_overlay_window.set_video_image(image)
-        self.vtk_overlay_window.set_camera_state({"ClippingRange": [10, 800]})
-        self.vtk_overlay_window.Render()
+        # Updates the view by capturing the latest video frame and processing it.
+        _, image, _ = self.video_source.read()  # Read a frame from the video source.
+        self._aruco_detect_and_follow(image)  # Detect and process any ArUco tags in the frame.
+        self.vtk_overlay_window.set_video_image(image)  # Set the video image on the VTK overlay window.
+        self.vtk_overlay_window.set_camera_state({"ClippingRange": [10, 800]})  # Adjust the camera's clipping range.
+        self.vtk_overlay_window.Render()  # Render the updated image in the VTK overlay window.
+
+        # Initialize the VTK window if it hasn't been initialized already.
         if not hasattr(self, 'initialized'):
-            self.vtk_overlay_window.Initialize()
-            self.initialized = True
+            self.vtk_overlay_window.Initialize()  # Initialize the VTK window.
+            self.initialized = True  # Set the initialized flag to True.
 
     def _aruco_detect_and_follow(self, image):
-        # Detect and follow ArUco tags in the image
+        # Detect ArUco markers in the provided image and follow them.
         _port_handles, _timestamps, _frame_numbers, tag2camera, _tracking_quality = self.tracker.get_frame(image)
         if tag2camera:
-            self._move_camera(tag2camera[0])
+            self._move_camera(tag2camera[0])  # Adjust the camera based on the detected tag.
 
     def _move_camera(self, tag2camera):
-        # Adjust the camera based on the detected tag position
+        # Adjust the camera position based on the ArUco tag's camera transformation matrix.
         transform_manager = TransformManager()
-        transform_manager.add("tag2camera", tag2camera)
-        camera2tag = transform_manager.get("camera2tag")
-        self.vtk_overlay_window.set_camera_pose(camera2tag)
+        transform_manager.add("tag2camera", tag2camera)  # Add the transformation matrix to the manager.
+        camera2tag = transform_manager.get("camera2tag")  # Get the inverse transformation matrix.
+        self.vtk_overlay_window.set_camera_pose(
+            camera2tag)  # Update the camera pose in the VTK window based on the transformation.
 
 
 if __name__ == '__main__':
