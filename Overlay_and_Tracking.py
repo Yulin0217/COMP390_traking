@@ -153,6 +153,8 @@ class OverlayBaseWidget(BaseWidget):
 
         # UI to change marker size.
         self.setup_marker_size_ui()
+        # UI to change aruco dictionary.
+        self.setup_dictionary_ui()
 
     def setup_marker_size_ui(self):
         # Label for marker size input.
@@ -175,6 +177,34 @@ class OverlayBaseWidget(BaseWidget):
         self.ar_config["marker size"] = marker_size
         self.tracker = ArUcoTracker(self.ar_config)
         self.tracker.start_tracking()  # Start the ArUco tracker.
+
+    def setup_dictionary_ui(self):
+        # Label for dictionary selection
+        self.dictionary_label = QLabel("Select ArUco Dictionary:", self)
+        self.layout.addWidget(self.dictionary_label)
+
+        # Dropdown for selecting dictionary
+        self.dictionary_selector = QComboBox(self)
+        self.dictionary_selector.addItems([
+            'DICT_4X4_50', 'DICT_4X4_100', 'DICT_4X4_250', 'DICT_4X4_1000',
+            'DICT_5X5_50', 'DICT_5X5_100', 'DICT_5X5_250', 'DICT_5X5_1000',
+            'DICT_6X6_50', 'DICT_6X6_100', 'DICT_6X6_250', 'DICT_6X6_1000',
+            'DICT_7X7_50', 'DICT_7X7_100', 'DICT_7X7_250', 'DICT_7X7_1000',
+            'DICT_ARUCO_ORIGINAL'
+        ])
+        self.layout.addWidget(self.dictionary_selector)
+
+        # Button to update the dictionary
+        self.update_dictionary_button = QPushButton("Update Aruco", self)
+        self.update_dictionary_button.clicked.connect(self.update_dictionary)
+        self.layout.addWidget(self.update_dictionary_button)
+
+    def update_dictionary(self):
+        # Update the ArUco dictionary based on user selection
+        selected_dictionary = self.dictionary_selector.currentText()
+        self.ar_config["aruco dictionary"] = selected_dictionary
+        self.tracker = ArUcoTracker(self.ar_config)
+        self.tracker.start_tracking()  # Restart the ArUco tracker
 
     def update_view(self):
         _, image, _ = self.video_source.read()
