@@ -128,6 +128,21 @@ class BaseWidget(QWidget):
             self.vtk_overlay_window.add_vtk_models(model_loader.models)
             self.vtk_overlay_window.Render()  # Re-render the window to update the color
 
+    def set_window_title(self, title):
+        self.setWindowTitle(title)
+
+
+class SmoothedTransform:
+    def __init__(self, alpha):
+        self.alpha = alpha
+        self.transform = None
+
+    def update(self, new_transform):
+        if self.transform is None:
+            self.transform = new_transform
+        else:
+            self.transform = self.alpha * new_transform + (1 - self.alpha) * self.transform
+        return self.transform
 
 class OverlayBaseWidget(BaseWidget):
     def __init__(self, image_source):
@@ -222,6 +237,8 @@ class OverlayBaseWidget(BaseWidget):
 
     def _move_camera(self, tag2camera):
         # Adjust the camera position based on the ArUco tag's camera transformation matrix.
+        smoothed_transform = SmoothedTransform(0.5)  # Create a smoothed transform with alpha=0.5
+        tag2camera = smoothed_transform.update(tag2camera)  # Smooth the transformation matrix
         transform_manager = TransformManager()
         transform_manager.add("tag2camera", tag2camera)  # Add the transformation matrix to the manager.
         camera2tag = transform_manager.get("camera2tag")  # Get the inverse transformation matrix.
@@ -229,9 +246,12 @@ class OverlayBaseWidget(BaseWidget):
             camera2tag)  # Update the camera pose in the VTK window based on the transformation.
 
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     overlay_widget = OverlayBaseWidget(0)
+    overlay_widget.set_window_title("Overlay and Tracking")
     overlay_widget.show()
     overlay_widget.start()
     sys.exit(app.exec())
+

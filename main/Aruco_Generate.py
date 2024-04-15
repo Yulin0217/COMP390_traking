@@ -8,9 +8,8 @@ from PySide6.QtCore import Qt
 class ArucoGenerator(QWidget):
     def __init__(self):
         super().__init__()
-        # 先初始化 aruco_dict 属性
-        self.aruco_dict = aruco.DICT_6X6_250  # 使用默认字典
-        self.init_ui()  # 然后调用 init_ui 方法
+        self.aruco_dict = aruco.DICT_4X4_50
+        self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("ArUco Marker Generator")

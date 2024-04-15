@@ -16,14 +16,14 @@ First, ensure you have Conda installed on your computer. If not, follow these st
 
 ### Creating and Activating the Environment
 
-Once Conda is installed, you can create and activate the environment with the `enviroment.yml` file by following these steps:
+Once Conda is installed, you can create and activate the environment with the `env.yml` file by following these steps:
 
 1. Open the Terminal (Mac/Linux) or Command Prompt/PowerShell (Windows).
-2. Navigate to the directory containing the `environment.yml` file of the project.
+2. Navigate to the directory containing the `env.yml` file of the project.
 3. Execute the following command to create the Conda environment:
 
 ```bash
-conda env create -f enviroment.yml
+conda env create -f env.yml
 ```
 
 4. After the environment has been successfully created, activate it with the command:
