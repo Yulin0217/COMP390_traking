@@ -1,15 +1,14 @@
 import platform
 from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog, \
+from PySide6.QtWidgets import QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog, \
     QVBoxLayout, QMessageBox, QLineEdit, QLabel
-from modified_video_source import TimestampedVideoSource
+from lib.modified_video_source import TimestampedVideoSource
 from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
 import numpy
 from sksurgerycore.transforms.transform_manager import TransformManager
-from arucotracker import ArUcoTracker
-from model_loader import ModelDirectoryLoader
-import numpy as np
+from lib.arucotracker import ArUcoTracker
+from lib.model_loader import ModelDirectoryLoader
 
 
 class BaseWidget(QWidget):
