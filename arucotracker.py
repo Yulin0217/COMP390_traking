@@ -95,7 +95,6 @@ class ArUcoTracker(SKSBaseTracker):
             raise ValueError('End of video')
 
 
-
         port_handles = []
         time_stamps = []
         frame_numbers = []

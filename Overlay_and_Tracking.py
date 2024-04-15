@@ -1,7 +1,7 @@
 import platform
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QHBoxLayout, QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog, \
-    QVBoxLayout, QMessageBox
+    QVBoxLayout, QMessageBox, QLineEdit, QLabel
 from modified_video_source import TimestampedVideoSource
 from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
@@ -136,7 +136,7 @@ class OverlayBaseWidget(BaseWidget):
         super().__init__(image_source)
 
         # Configure the ArUco tracker with specific parameters for tracking.
-        ar_config = {
+        self.ar_config = {
             "tracker type": "aruco",  # Specifies the type of tracker to use.
             "video source": 'none',  # Indicates that no separate video source will be used.
             "debug": False,  # Debug mode is turned off.
@@ -148,21 +148,42 @@ class OverlayBaseWidget(BaseWidget):
                                              dtype=numpy.float32),  # Camera projection matrix.
             "camera distortion": numpy.zeros((1, 4), numpy.float32)  # Camera distortion coefficients.
         }
-        self.tracker = ArUcoTracker(ar_config)
+        self.tracker = ArUcoTracker(self.ar_config)
+        self.tracker.start_tracking()  # Start the ArUco tracker.
+
+        # UI to change marker size.
+        self.setup_marker_size_ui()
+
+    def setup_marker_size_ui(self):
+        # Label for marker size input.
+        self.marker_size_label = QLabel("Enter Marker Size (mm):", self)
+        self.layout.addWidget(self.marker_size_label)
+
+        # Input field for marker size.
+        self.marker_size_input = QLineEdit(self)
+        self.marker_size_input.setText("50")  # Default size
+        self.layout.addWidget(self.marker_size_input)
+
+        # Button to update marker size.
+        self.update_marker_size_button = QPushButton("Update Marker Size", self)
+        self.update_marker_size_button.clicked.connect(self.update_marker_size)
+        self.layout.addWidget(self.update_marker_size_button)
+
+    def update_marker_size(self):
+        # Update the marker size based on user input.
+        marker_size = float(self.marker_size_input.text())
+        self.ar_config["marker size"] = marker_size
+        self.tracker = ArUcoTracker(self.ar_config)
         self.tracker.start_tracking()  # Start the ArUco tracker.
 
     def update_view(self):
-        # Updates the view by capturing the latest video frame and processing it.
-        _, image, _ = self.video_source.read()  # Read a frame from the video source.
-        self._aruco_detect_and_follow(image)  # Detect and process any ArUco tags in the frame.
-        self.vtk_overlay_window.set_video_image(image)  # Set the video image on the VTK overlay window.
-        self.vtk_overlay_window.set_camera_state({"ClippingRange": [10, 800]})  # Adjust the camera's clipping range.
-        self.vtk_overlay_window.Render()  # Render the updated image in the VTK overlay window.
-
-        # Initialize the VTK window if it hasn't been initialized already.
+        _, image, _ = self.video_source.read()
+        self._aruco_detect_and_follow(image)
+        self.vtk_overlay_window.set_video_image(image)
+        self.vtk_overlay_window.Render()
         if not hasattr(self, 'initialized'):
-            self.vtk_overlay_window.Initialize()  # Initialize the VTK window.
-            self.initialized = True  # Set the initialized flag to True.
+            self.vtk_overlay_window.Initialize()
+            self.initialized = True
 
     def _aruco_detect_and_follow(self, image):
         # Detect ArUco markers in the provided image and follow them.
