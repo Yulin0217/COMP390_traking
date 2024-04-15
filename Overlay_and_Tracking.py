@@ -7,7 +7,7 @@ from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
 import numpy
 from sksurgerycore.transforms.transform_manager import TransformManager
-from sksurgeryarucotracker.arucotracker import ArUcoTracker
+from arucotracker import ArUcoTracker
 from model_loader import ModelDirectoryLoader
 import numpy as np
 
@@ -88,8 +88,14 @@ class BaseWidget(QWidget):
         self.video_source_selector.currentIndexChanged.connect(self.handle_video_source_change)
 
     def handle_video_source_change(self, index):
-        # Toggle the visibility of the upload video button based on selection
-        self.upload_video_button.setVisible(self.video_source_selector.currentText() == "Upload Video File")
+        # Handle video source selection change
+        if self.video_source_selector.currentText() == "Upload Video File":
+            self.upload_video_button.setVisible(True)
+        else:
+            self.upload_video_button.setVisible(False)
+            # Directly change to the selected camera source
+            camera_index = self.video_source_selector.currentIndex()  # Assuming camera indexes are 0 and 1
+            self.change_video_source(camera_index)
 
     def upload_video(self):
         # Open a file dialog to select a video file

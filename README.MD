@@ -23,7 +23,7 @@ Once Conda is installed, you can create and activate the environment with the `e
 3. Execute the following command to create the Conda environment:
 
 ```bash
-conda env create -f env.yml
+conda env create -f enviroment.yml
 ```
 
 4. After the environment has been successfully created, activate it with the command:
