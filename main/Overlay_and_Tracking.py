@@ -87,7 +87,7 @@ class BaseWidget(QWidget):
         self.video_source_selector.currentIndexChanged.connect(self.handle_video_source_change)
 
     def handle_video_source_change(self, index):
-        # Handle video source selection change
+        # Handle video source selection change  and show/hide the upload video button
         if self.video_source_selector.currentText() == "Upload Video File":
             self.upload_video_button.setVisible(True)
         else:
@@ -98,7 +98,7 @@ class BaseWidget(QWidget):
 
     def upload_video(self):
         # Open a file dialog to select a video file
-        video_file_path, _ = QFileDialog.getOpenFileName(self, "Select Video File", "", "Video Files (*.mp4 *.avi)")
+        video_file_path, _ = QFileDialog.getOpenFileName(self, "Select Video File", "", "Video Files (*.mp4 *.avi *.mkv)")
         if video_file_path:
             self.change_video_source(video_file_path)
 
