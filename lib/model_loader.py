@@ -150,6 +150,8 @@ class ModelDirectoryLoader:
                         raise FileNotFoundError(
                             f"File {full_path} doesn't exist")
 
+
+
                     if not rgb_color:
                         self.colours[filename] = (float(row[1]),
                                                   float(row[2]),

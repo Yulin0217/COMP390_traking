@@ -3,12 +3,12 @@ from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QFileDialog, QPushButton, QComboBox, QApplication, QWidget, QColorDialog, \
     QVBoxLayout, QMessageBox, QLineEdit, QLabel
 from lib.modified_video_source import TimestampedVideoSource
-from sksurgeryvtk.widgets.vtk_overlay_window import VTKOverlayWindow
 import sys
 import numpy
-from sksurgerycore.transforms.transform_manager import TransformManager
 from lib.arucotracker import ArUcoTracker
 from lib.model_loader import ModelDirectoryLoader
+from lib.overlay_window import VTKOverlayWindow
+from lib.transform_manager import TransformManager
 
 
 class BaseWidget(QWidget):
