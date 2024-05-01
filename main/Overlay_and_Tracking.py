@@ -133,16 +133,54 @@ class BaseWidget(QWidget):
 
 
 class SmoothedTransform:
-    def __init__(self, alpha):
+    def __init__(self, alpha, min_alpha=0.01, max_alpha=0.9):
+        """
+        Initializes the adaptive smoothing transform class.
+        
+        Parameters:
+        alpha (float): The initial smoothing factor.
+        min_alpha (float): The minimum allowable value for alpha to prevent it from becoming too low.
+        max_alpha (float): The maximum allowable value for alpha to prevent it from becoming too high.
+        """
         self.alpha = alpha
+        self.min_alpha = min_alpha
+        self.max_alpha = max_alpha
         self.transform = None
 
+    def adjust_alpha(self, new_transform):
+        """
+        Adjusts the smoothing factor alpha based on the difference between the new transform
+        and the current transform to better adapt to recent data changes.
+        
+        Parameters:
+        new_transform (float): The new data point used to update the transform.
+        """
+        if self.transform is not None:
+            # Calculate the absolute difference between the current and new transforms
+            error = abs(new_transform - self.transform)
+            # Dynamically adjust alpha based on the error, inversely scaling it
+            self.alpha = max(self.min_alpha, min(self.max_alpha, 1 / (1 + error)))
+
     def update(self, new_transform):
+        """
+        Updates the current transform with a new data point using adaptive exponential smoothing.
+        
+        Parameters:
+        new_transform (float): The new data point to incorporate into the smoothed data.
+        
+        Returns:
+        float: The updated transform value.
+        """
         if self.transform is None:
+            # If no transform has been set yet, initialize it with the new transform
             self.transform = new_transform
         else:
+            # Adjust alpha based on the new data point
+            self.adjust_alpha(new_transform)
+            # Apply the adjusted alpha to compute the new smoothed transform
             self.transform = self.alpha * new_transform + (1 - self.alpha) * self.transform
         return self.transform
+
 
 class OverlayBaseWidget(BaseWidget):
     def __init__(self, image_source):
