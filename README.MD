@@ -48,7 +48,7 @@ This document describes how to use two Python scripts: `Overlay_and_Tracking.py`
 - **Image Overlay**: Overlays graphics or other visual elements on the video frame based on the detected markers.
 - **Spatial Tracking**: Uses detected markers for spatial positioning to support user interaction with the application.
 - **Video Source Switching**: Allows switching between live camera feeds and uploaded video files, enabling flexible input sources for different testing or operational scenarios.
-- **Model Color Modification**: Users can change the color of overlaid models dynamically, enhancing visual clarity or thematic consistency.
+- **Model Color Modification**: Users can change the colour of overlaid models dynamically, enhancing visual clarity or thematic consistency.
 - **Aruco Marker Resizing**: Provides functionality to adjust the size of ArUco markers recognized by the system, accommodating various distances and camera specifications.
 - **Different ArUco Marker Recognition**: Supports the ability to recognize different types of ArUco markers by selecting from various predefined dictionaries, ensuring adaptability to diverse application requirements.
 
@@ -71,8 +71,8 @@ This project is licensed under the MIT License. For more details, see the `LICEN
 
 ##  Third-party libraries contained
 
-SciKit-Surgery Augmented Reality
-OpenCV
-VTK
-Numpy
+SciKit-Surgery Augmented Reality,
+OpenCV,
+VTK,
+Numpy,
 
