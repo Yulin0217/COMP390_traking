@@ -2,6 +2,14 @@
 
 This project enables the overlaying of models onto video footage, which can be sourced from a camera, uploaded videos, and more. It incorporates model tracking with ArUco markers for precise positioning within the video frame. Primarily, the project is designed to complement Augmented Reality (AR) applications in the context of Endovascular Intervention surgery training and practice. It utilizes specific markers displayed within the view to pinpoint the model's location in AR headsets, ensuring synchronization between real-world and AR positions.
 
+##  Third-party libraries contained (Compliance with the UoL COMP390 Honours Year Project 2023-24 requirement)
+
+SciKit-Surgery Augmented Reality,
+OpenCV,
+VTK,
+Numpy,
+
+
 ## Quick Start
 
 This guide will assist you in installing Conda and setting up your project environment using the `env.yml` file.
@@ -69,10 +77,4 @@ This document describes how to use two Python scripts: `Overlay_and_Tracking.py`
 
 This project is licensed under the MIT License. For more details, see the `LICENSE` file.
 
-##  Third-party libraries contained
-
-SciKit-Surgery Augmented Reality,
-OpenCV,
-VTK,
-Numpy,
 
