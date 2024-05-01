@@ -1,5 +1,5 @@
-# Computer Vision and AR for Endovascular Intervention (Part1)
-
+# Computer Vision and AR for Endovascular Intervention
+## Real-world Model Interaction and Tracking ( As Part 1 of the project)
 This project enables the overlaying of models onto video footage, which can be sourced from a camera, uploaded videos, and more. It incorporates model tracking with ArUco markers for precise positioning within the video frame. Primarily, the project is designed to complement Augmented Reality (AR) applications in the context of Endovascular Intervention surgery training and practice. It utilizes specific markers displayed within the view to pinpoint the model's location in AR headsets, ensuring synchronization between real-world and AR positions.
 
 
