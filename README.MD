@@ -72,7 +72,7 @@ This document describes how to use two Python scripts: `Overlay_and_Tracking.py`
 
 This project is licensed under the MIT License. For more details, see the `LICENSE` file.
 
-##  Third-party libraries contained (Compliance with the UoL COMP390 Honours Year Project 2023-24 requirement)
+##  Third-party libraries contained (Based on the UoL COMP390 Honours Year Project 2023-24 requirement)
 
 SciKit-Surgery Augmented Reality,
 OpenCV,
